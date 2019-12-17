@@ -23,10 +23,10 @@ def create_spark_session():
 
 def process_song_data(spark, input_data, output_data):
     # get filepath to song data file
-    song_data = 
+    song_data = input_data+"song-data/*/*/*/*.json"
     
     # read song data file
-    df = spark.read.json(input_data+"song-data/*/*/*/*.json")
+    df = spark.read.json(song_data)
 
     # extract columns to create songs table
     songs_table = df.select('song_id','title','artist_id','year','duration').dropDuplicates(['song_id'])
@@ -49,7 +49,7 @@ def process_log_data(spark, input_data, output_data):
     df =  spark.read.json(log_data)
     
     # filter by actions for song plays
-    df = df.where(log_data['page'] == 'NextSong')
+    df = df.where(df['page'] == 'NextSong')
 
     # extract columns for users table    
     users_table = df.select('userId','firstName','lastName','gender','level').dropDuplicates(['userId'])
@@ -84,7 +84,7 @@ def process_log_data(spark, input_data, output_data):
     # read in song data to use for songplays table
     song_df = spark.read.json(input_data + "song-data/*/*/*/*.json")
     
-     df = df.join(song_df, song_df.title == df.song)
+    df = df.join(song_df, song_df.title == df.song)
     # extract columns from joined song and log datasets to create songplays table 
     songplays_table = df.select(
         col('ts').alias('start_time'),
@@ -101,7 +101,7 @@ def process_log_data(spark, input_data, output_data):
     songplays_with_id = songplays_table.withColumn('songplay_id', monotonically_increasing_id()) #Add ids to songplays
     
     # write songplays table to parquet files partitioned by year and month
-    songplays_with_id.write.partitionBy('year', 'month').parquet('s3a://karikari-udacity/outputs/songplays.parquet', 'overwrite')
+    songplays_with_id.write.partitionBy('year', 'month').parquet(output_data+'songplays.parquet', 'overwrite')
 
 
 def main():
