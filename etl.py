@@ -9,8 +9,8 @@ from pyspark.sql.functions import year, month, dayofmonth, hour, weekofyear, dat
 config = configparser.ConfigParser()
 config.read('dl.cfg')
 
-os.environ['AWS_ACCESS_KEY_ID']=config['AWS_ACCESS_KEY_ID']
-os.environ['AWS_SECRET_ACCESS_KEY']=config['AWS_SECRET_ACCESS_KEY']
+os.environ['AWS_ACCESS_KEY_ID']=config['AWS']['AWS_ACCESS_KEY_ID']
+os.environ['AWS_SECRET_ACCESS_KEY']=config['AWS']['AWS_SECRET_ACCESS_KEY']
 
 
 def create_spark_session():
@@ -26,7 +26,7 @@ def process_song_data(spark, input_data, output_data):
     song_data = 
     
     # read song data file
-    df = 
+    df = spark.read.json(input_data+"song-data/*/*/*/*.json")
 
     # extract columns to create songs table
     songs_table = 
@@ -83,8 +83,8 @@ def process_log_data(spark, input_data, output_data):
 
 def main():
     spark = create_spark_session()
-    input_data = "s3a://udacity-dend/"
-    output_data = ""
+    input_data = "s3a://karikari-udacity/"
+    output_data = "s3a://karikari-udacity/outputs/"
     
     process_song_data(spark, input_data, output_data)    
     process_log_data(spark, input_data, output_data)
