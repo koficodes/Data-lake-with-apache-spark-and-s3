@@ -2,7 +2,7 @@ import configparser
 from datetime import datetime
 import os
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import udf, col
+from pyspark.sql.functions import udf, col, monotonically_increasing_id
 from pyspark.sql.functions import year, month, dayofmonth, hour, weekofyear, date_format
 
 
@@ -67,19 +67,41 @@ def process_log_data(spark, input_data, output_data):
 
 
     # extract columns to create time table
-    time_table = 
+    time_table = df.select(
+        col('datetime').alias('start_time'),
+        hour('datetime').alias('hour'),
+        dayofmonth('datetime').alias('day'),
+        weekofyear('datetime').alias('week'),
+        month('datetime').alias('month'),
+        year('datetime').alias('year') 
+    )
+    
+    time_table = time_table.dropDuplicates(['start_time'])
     
     # write time table to parquet files partitioned by year and month
-    time_table
+    time_table.write.partitionBy('year', 'month').parquet(output_data+'time.parquet', 'overwrite')
 
     # read in song data to use for songplays table
-    song_df = 
-
+    song_df = spark.read.json(input_data + "song-data/*/*/*/*.json")
+    
+     df = df.join(song_df, song_df.title == df.song)
     # extract columns from joined song and log datasets to create songplays table 
-    songplays_table = 
-
+    songplays_table = df.select(
+        col('ts').alias('start_time'),
+        col('userId').alias('user_id'),
+        col('level').alias('level'),
+        col('song_id').alias('song_id'),
+        col('artist_id').alias('artist_id'),
+        col('sessionId').alias('session_id'),
+        col('location').alias('location'),
+        col('userAgent').alias('user_agent'),
+        col('year').alias('year'),
+        month('datetime').alias('month')
+    )
+    songplays_with_id = songplays_table.withColumn('songplay_id', monotonically_increasing_id()) #Add ids to songplays
+    
     # write songplays table to parquet files partitioned by year and month
-    songplays_table
+    songplays_with_id.write.partitionBy('year', 'month').parquet('s3a://karikari-udacity/outputs/songplays.parquet', 'overwrite')
 
 
 def main():
