@@ -8,6 +8,8 @@ This project fetches the data from s3 using spark, processes the data and saves 
 The *star schema* is used for structuring the files with `songplays` as the **fact table** and `users, songs, artists and time` as **dimension tables**
 This makes the querying of the data much easier for analysis.
 
+![schema image](schema_diagram.png)
+
 ### HOW TO RUN THIS PROJECT
 
 #### Required Python Packages
@@ -36,3 +38,6 @@ From the project directory run the following command:
     $ python3 etl.py
 
 
+If everything runs successfully you should see the same file list below in your s3 bucket
+
+![S3 image](out_puts.png)

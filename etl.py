@@ -22,6 +22,17 @@ def create_spark_session():
 
 
 def process_song_data(spark, input_data, output_data):
+    """
+        This function fetches song_data from s3, transforms it and saves it back to s3
+        in parquet file format
+        
+        Parameters: 
+            spark: Spark session
+            input_data: path to load song data from s3
+            output_data: path to save parquet files in s3
+        Returns: 
+                None
+    """
     # get filepath to song data file
     song_data = input_data+"song-data/*/*/*/*.json"
     
@@ -42,6 +53,17 @@ def process_song_data(spark, input_data, output_data):
 
 
 def process_log_data(spark, input_data, output_data):
+    """
+        This function fetches log_data from s3, transforms it and saves it back to s3
+        in parquet file format
+        
+        Parameters: 
+            spark: Spark session
+            input_data: path to load log data from s3
+            output_data: path to save parquet files in s3
+        Returns: 
+                None
+    """
     # get filepath to log data file
     log_data = input_data+"log-data/*.json"
 
@@ -106,6 +128,8 @@ def process_log_data(spark, input_data, output_data):
 
 def main():
     spark = create_spark_session()
+    
+    #Uploaded data to my bucket to avoid permission issues
     input_data = "s3a://karikari-udacity/"
     output_data = "s3a://karikari-udacity/outputs/"
     
