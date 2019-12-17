@@ -29,37 +29,37 @@ def process_song_data(spark, input_data, output_data):
     df = spark.read.json(input_data+"song-data/*/*/*/*.json")
 
     # extract columns to create songs table
-    songs_table = 
+    songs_table = df.select('song_id','title','artist_id','year','duration').dropDuplicates(['song_id'])
     
     # write songs table to parquet files partitioned by year and artist
-    songs_table
+    songs_table.write.partitionBy('year','artist_id').parquet(output_data+'songs.parquet','overwrite')
 
     # extract columns to create artists table
-    artists_table = 
+    artists_table = df.select('artist_id','artist_name','artist_location','artist_latitude','artist_longitude').dropDuplicates(['artist_id'])
     
     # write artists table to parquet files
-    artists_table
+    artists_table.write.parquet(output_data+'artists.parquet','overwrite')
 
 
 def process_log_data(spark, input_data, output_data):
     # get filepath to log data file
-    log_data =
+    log_data = input_data+"log-data/*.json"
 
     # read log data file
-    df = 
+    df =  spark.read.json(log_data)
     
     # filter by actions for song plays
-    df = 
+    df = df.where(log_data['page'] == 'NextSong')
 
     # extract columns for users table    
-    artists_table = 
+    users_table = df.select('userId','firstName','lastName','gender','level').dropDuplicates(['userId'])
     
     # write users table to parquet files
-    artists_table
+    users_table.write.parquet(output_data +'users.parquet','overwrite')
 
     # create timestamp column from original timestamp column
-    get_timestamp = udf()
-    df = 
+    get_timestamp = udf(lambda x: str(int(int(x)/1000)))
+    df = df.withColumn('timestamp', get_timestamp(df.ts)) 
     
     # create datetime column from original timestamp column
     get_datetime = udf()
